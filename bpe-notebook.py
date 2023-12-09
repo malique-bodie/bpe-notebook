@@ -1469,7 +1469,7 @@ def run_train():
     max_length = 500  # max len of sequence of dataset (of what you want)
     use_padding = True
     dataset_name = 'human_enhancers_cohn'
-    batch_size = 1
+    batch_size = 64
     learning_rate = 6e-4  # good default for Hyena
     rc_aug = True  # reverse complement augmentation
     add_eos = False  # add end of sentence token

@@ -680,7 +680,6 @@ class GPT2Embeddings(nn.Module):
         """
         factory_kwargs = {'device': device, 'dtype': dtype}
         super().__init__()
-        print(vocab_size, embed_dim, padding_idx)
         if word_embed_proj_dim is None:
             self.word_embeddings = nn.Embedding(vocab_size, embed_dim, padding_idx=padding_idx,
                                                 **factory_kwargs)
@@ -701,7 +700,6 @@ class GPT2Embeddings(nn.Module):
             position_ids: (batch, seqlen)
         """
         batch_size, seqlen = input_ids.shape
-        print(torch.max(input_ids))
         embeddings = self.word_embeddings(input_ids)
         if self.project_in is not None:
             embeddings = self.project_in(embeddings)
@@ -1255,7 +1253,6 @@ def read_sequences(file_path):
 all_sequences = []
 
 for i in range(5):
-    print(i)
     file_path = f'GUE/tf/{i}/train.csv'
     sequences = read_sequences(file_path)
     all_sequences.extend(sequences)
@@ -1469,7 +1466,7 @@ def run_train():
     max_length = 500  # max len of sequence of dataset (of what you want)
     use_padding = True
     dataset_name = 'human_enhancers_cohn'
-    batch_size = 2
+    batch_size = 256
     learning_rate = 6e-4  # good default for Hyena
     rc_aug = True  # reverse complement augmentation
     add_eos = False  # add end of sentence token
@@ -1629,7 +1626,6 @@ you'll need 8 A100s 80GB, and all that code is in the main [github repo](https:/
 
 """
 
-#@title Single example
 import json
 import os
 import subprocess
@@ -1725,10 +1721,8 @@ def inference_single():
 
     print(embeddings.shape)  # embeddings here!
 
-# # uncomment to run! (to get embeddings)
 # inference_single()
 
-#@title Batch example
 """
 Let's say you want to do inference on a dataset to grab a lot of embeddings,
 you can just loop thru a dataloader like this.

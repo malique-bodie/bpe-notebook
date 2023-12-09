@@ -1226,6 +1226,7 @@ import pandas as pd
 
 # drive.mount('/content/drive')
 
+"""""
 # logic for training a BPE tokenizer on the human genome
 unk_token = "[UNK]"  # token for unknown words
 spl_tokens = ["[CLS]", "[SEP]", "[BOS]", "[MASK]", "[PAD]", "[RESERVED]", "[UNK]"]  # special tokens
@@ -1262,6 +1263,8 @@ tokenizer.save(f"./bpe_output.json")
 
 
 print("BPE saved")
+
+"""""
 
 #@title GenomicBenchmark dataset
 

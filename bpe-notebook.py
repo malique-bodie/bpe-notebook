@@ -1256,7 +1256,7 @@ all_sequences = []
 
 for i in range(5):
     print(i)
-    file_path = f'./data/GUE/tf/{i}/train.csv'
+    file_path = f'GUE/tf/{i}/train.csv'
     sequences = read_sequences(file_path)
     all_sequences.extend(sequences)
 

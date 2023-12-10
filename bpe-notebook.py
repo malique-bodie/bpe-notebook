@@ -1643,7 +1643,7 @@ def run_train():
     train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
     train_sequence = train_df['sequence']
     train_sequence = train_sequence.tolist()
-    train_tokenized = tokenizer(train_sequence)["input_ids"]
+    train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
     train_labels = train_df['label']
     train_labels = train_labels.tolist()
     #checking len of each sequence

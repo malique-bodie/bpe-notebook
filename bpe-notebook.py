@@ -1278,7 +1278,7 @@ There are 8 datasets to choose from.
 from random import random
 import numpy as np
 from pathlib import Path
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset, DataLoader
 
 
 # helper functions

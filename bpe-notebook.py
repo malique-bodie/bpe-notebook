@@ -1646,9 +1646,6 @@ def run_train():
     train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
     train_labels = train_df['label']
     train_labels = train_labels.tolist()
-    #checking len of each sequence
-    lens = [len(x) for x in train_tokenized]
-    print(f"LEN OF SEQUENCES: {lens}")
 
     # create datasets
     test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
@@ -1692,10 +1689,10 @@ def run_train():
     print("Data loaded...")
 
     # loss function
-    loss_fn = nn.CrossEntropyLoss()
+    #loss_fn = nn.CrossEntropyLoss()
 
     # create optimizer
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    #optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     model.to(device)
 

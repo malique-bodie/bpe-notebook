@@ -1702,7 +1702,7 @@ def run_train():
     "evaluation_strategy": "epoch",
     "save_strategy": "no",
     "num_train_epochs": 100,
-    "per_device_train_batch_size": 256,
+    "per_device_train_batch_size": 64,
     "learning_rate": 2e-5,
     "per_device_eval_batch_size": 1,
     }

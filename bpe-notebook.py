@@ -1654,6 +1654,7 @@ def run_train():
     test_tokenized = tokenizer(test_sequence)["input_ids"]
     test_labels = test_df['label']
     test_labels = test_labels.tolist()
+    print(f"SHAPE OF TRAIN SEQ DATASET: {len(train_tokenized), len(train_tokenized[0])}")
 
     # Create a dataset for training
     ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})

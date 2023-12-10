@@ -54,7 +54,6 @@ from functools import partial
 from torch import Tensor
 from torchvision.ops import StochasticDepth
 from collections import namedtuple
-from datasets import Dataset
 from sklearn.metrics import accuracy_score, f1_score, matthews_corrcoef, precision_score, recall_score
 
 """# HyenaDNA
@@ -1641,6 +1640,22 @@ def run_train():
     #     padding_side='left', # since HyenaDNA is causal, we pad on the left
     # )
 
+  
+
+    # Create a dataset for training
+    class CustomDataset(Dataset):
+        def __init__(self, data, target):
+            self.data = data
+            self.target = target
+
+        def __len__(self):
+            return len(self.target)
+
+        def __getitem__(self, idx):
+            data = self.data[idx]
+            label = self.target[idx]
+            return data, label
+    
     train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
     train_sequence = train_df['sequence']
     train_sequence = train_sequence.tolist()
@@ -1656,12 +1671,11 @@ def run_train():
     test_labels = test_df['label']
     test_labels = test_labels.tolist()
 
-    # Create a dataset for training
-    ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})
-    ds_test = Dataset.from_dict({"input_ids": test_tokenized, "labels": test_labels})
-    ds_train.set_format("pt")
-    ds_test.set_format("pt")
-    print(ds_test)
+    ds_train = CustomDataset(train_tokenized,train_labels)
+    ds_test = CustomDataset(test_tokenized,test_labels)
+    # ds_train.set_format("pt")
+    # ds_test.set_format("pt")
+    # print(ds_test)
 
 
     # ds_train = GenomicBenchmarkDataset(

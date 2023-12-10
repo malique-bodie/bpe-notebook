@@ -1654,14 +1654,12 @@ def run_train():
     test_tokenized = tokenizer(test_sequence)["input_ids"]
     test_labels = test_df['label']
     test_labels = test_labels.tolist()
-    print(f"SHAPE OF TRAIN SEQ DATASET: {len(train_labels)}")
-    print(train_labels)
 
     # Create a dataset for training
     ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})
     ds_test = Dataset.from_dict({"input_ids": test_tokenized, "labels": test_labels})
-    ds_train.set_format("pt")
-    ds_test.set_format("pt")
+    ds_train.set_format("torch")
+    ds_test.set_format("torch")
 
 
     # ds_train = GenomicBenchmarkDataset(
@@ -1684,43 +1682,43 @@ def run_train():
     #     add_eos=add_eos,
     # )
 
-    # train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True)
-    # test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
 
     print("Data loaded...")
 
-    # loss function
-    #loss_fn = nn.CrossEntropyLoss()
+    #loss function
+    loss_fn = nn.CrossEntropyLoss()
 
-    # create optimizer
-    #optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    #create optimizer
+    optimizer = optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     model.to(device)
 
-    args = {
-    "output_dir": "tmp",
-    "evaluation_strategy": "epoch",
-    "save_strategy": "no",
-    "num_train_epochs": 100,
-    "per_device_train_batch_size": 64,
-    "learning_rate": 2e-5,
-    "per_device_eval_batch_size": 1,
-    }
-    training_args = TrainingArguments(**args)
+    # args = {
+    # "output_dir": "tmp",
+    # "evaluation_strategy": "epoch",
+    # "save_strategy": "no",
+    # "num_train_epochs": 100,
+    # "per_device_train_batch_size": 64,
+    # "learning_rate": 2e-5,
+    # "per_device_eval_batch_size": 1,
+    # }
+    # training_args = TrainingArguments(**args)
 
-    # for epoch in range(num_epochs):
+    for epoch in range(num_epochs):
 
-    #     train(model, device, train_loader, optimizer, epoch, loss_fn)
-    #     test(model, device, test_loader, loss_fn)
-    #     optimizer.step()
-    trainer = Trainer(model=model,
-                args=training_args,
-                train_dataset=ds_train,
-                eval_dataset=ds_test,
-                compute_metrics=compute_metrics,)
+        train(model, device, train_loader, optimizer, epoch, loss_fn)
+        test(model, device, test_loader, loss_fn)
+        optimizer.step()
+    # trainer = Trainer(model=model,
+    #             args=training_args,
+    #             train_dataset=ds_train,
+    #             eval_dataset=ds_test,
+    #             compute_metrics=compute_metrics,)
     
-    result = trainer.train()
-    print(result)
+    # result = trainer.train()
+    # print(result)
 
 # launch it!
 run_train()  # uncomment to run

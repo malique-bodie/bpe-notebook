@@ -1408,6 +1408,7 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, log_interval=1
     """Training loop."""
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
+        print(target)
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -1642,24 +1643,24 @@ def run_train():
 
     train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
     train_sequence = train_df['sequence']
-    train_sequence = torch.tensor(train_sequence.tolist())
+    train_sequence = train_sequence.tolist()
     train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
     train_labels = train_df['label']
-    train_labels = torch.tensor(train_labels.tolist())
+    train_labels = train_labels.tolist()
 
     # create datasets
     test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
     test_sequence = test_df['sequence']
-    test_sequence = torch.tensor(test_sequence.tolist()) # added torch.tensor to convert from list to tensor for gpu
+    test_sequence = test_sequence.tolist()
     test_tokenized = tokenizer(test_sequence)["input_ids"]
     test_labels = test_df['label']
-    test_labels = torch.tensor(test_labels.tolist())
+    test_labels = test_labels.tolist()
 
     # Create a dataset for training
     ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})
     ds_test = Dataset.from_dict({"input_ids": test_tokenized, "labels": test_labels})
-    ds_train.set_format("torch")
-    ds_test.set_format("torch")
+    ds_train.set_format("pt")
+    ds_test.set_format("pt")
 
 
     # ds_train = GenomicBenchmarkDataset(

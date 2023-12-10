@@ -1318,9 +1318,9 @@ class GenomicBenchmarkDataset(torch.utils.data.Dataset):
         self,
         split,
         max_length,
-        dataset_name='human_enhancers_cohn',
+        dataset_name='tf/0',
         d_output=2, # default binary classification
-        dest_path="./content", # default for colab
+        dest_path="./GUE", # default for colab
         tokenizer=None,
         tokenizer_name=None,
         use_padding=None,
@@ -1337,13 +1337,6 @@ class GenomicBenchmarkDataset(torch.utils.data.Dataset):
         self.add_eos = add_eos
         self.d_output = d_output  # needed for decoder to grab
         self.rc_aug = rc_aug
-
-        if not is_downloaded(dataset_name, cache_path=dest_path):
-            print("downloading {} to {}".format(dataset_name, dest_path))
-            download_dataset(dataset_name, version=0, dest_path=dest_path)
-        else:
-            print("already downloaded {}-{}".format(split, dataset_name))
-
         # use Path object
         base_path = Path(dest_path) / dataset_name / split
 
@@ -1407,8 +1400,6 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, log_interval=1
     """Training loop."""
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        print(type(data))
-        print(type(target))
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -1481,7 +1472,7 @@ def run_train():
     num_epochs = 100  # ~100 seems fine
     max_length = 500  # max len of sequence of dataset (of what you want)
     use_padding = True
-    dataset_name = 'human_enhancers_cohn'
+    dataset_name = 'tf/0'
     batch_size = 64
     learning_rate = 6e-4  # good default for Hyena
     rc_aug = True  # reverse complement augmentation
@@ -1644,61 +1635,61 @@ def run_train():
   
 
     # Create a dataset for training
-    class CustomDataset(Dataset):
-        def __init__(self, data, target):
-            self.data = data
-            self.target = target
+    # class CustomDataset(Dataset):
+    #     def __init__(self, data, target):
+    #         self.data = data
+    #         self.target = target
 
-        def __len__(self):
-            return len(self.target)
+    #     def __len__(self):
+    #         return len(self.target)
 
-        def __getitem__(self, idx):
-            data = self.data[idx]
-            label = self.target[idx]
-            return data, label
+    #     def __getitem__(self, idx):
+    #         data = self.data[idx]
+    #         label = self.target[idx]
+    #         return data, label
     
-    train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
-    train_sequence = train_df['sequence']
-    train_sequence = train_sequence.tolist()
-    train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
-    train_labels = train_df['label']
-    train_labels = torch.from_numpy(np.asarray(train_labels.tolist()))
+    # train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
+    # train_sequence = train_df['sequence']
+    # train_sequence = train_sequence.tolist()
+    # train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
+    # train_labels = train_df['label']
+    # train_labels = torch.from_numpy(np.asarray(train_labels.tolist()))
 
-    # create datasets
-    test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
-    test_sequence = test_df['sequence']
-    test_sequence = test_sequence.tolist()
-    test_tokenized = tokenizer(test_sequence)["input_ids"]
-    test_labels = test_df['label']
-    test_labels = torch.from_numpy(np.asarray(test_labels.tolist()))
+    # # create datasets
+    # test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
+    # test_sequence = test_df['sequence']
+    # test_sequence = test_sequence.tolist()
+    # test_tokenized = tokenizer(test_sequence)["input_ids"]
+    # test_labels = test_df['label']
+    # test_labels = torch.from_numpy(np.asarray(test_labels.tolist()))
     
 
-    ds_train = CustomDataset(train_tokenized,train_labels)
-    ds_test = CustomDataset(test_tokenized,test_labels)
-    # ds_train.set_format("pt")
-    # ds_test.set_format("pt")
-    # print(ds_test)
+    # ds_train = CustomDataset(train_tokenized,train_labels)
+    # ds_test = CustomDataset(test_tokenized,test_labels)
+    # # ds_train.set_format("pt")
+    # # ds_test.set_format("pt")
+    # # print(ds_test)
 
 
-    # ds_train = GenomicBenchmarkDataset(
-    #     max_length = max_length,
-    #     use_padding = use_padding,
-    #     split = 'train',
-    #     tokenizer=tokenizer,
-    #     dataset_name=dataset_name,
-    #     rc_aug=rc_aug,
-    #     add_eos=add_eos,
-    # )
+    ds_train = GenomicBenchmarkDataset(
+        max_length = max_length,
+        use_padding = use_padding,
+        split = 'train',
+        tokenizer=tokenizer,
+        dataset_name=dataset_name,
+        rc_aug=rc_aug,
+        add_eos=add_eos,
+    )
 
-    # ds_test = GenomicBenchmarkDataset(
-    #     max_length = max_length,
-    #     use_padding = use_padding,
-    #     split = 'test',
-    #     tokenizer=tokenizer,
-    #     dataset_name=dataset_name,
-    #     rc_aug=rc_aug,
-    #     add_eos=add_eos,
-    # )
+    ds_test = GenomicBenchmarkDataset(
+        max_length = max_length,
+        use_padding = use_padding,
+        split = 'test',
+        tokenizer=tokenizer,
+        dataset_name=dataset_name,
+        rc_aug=rc_aug,
+        add_eos=add_eos,
+    )
 
     train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True,)
     test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)

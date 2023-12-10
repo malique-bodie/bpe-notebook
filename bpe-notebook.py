@@ -55,6 +55,7 @@ from torch import Tensor
 from torchvision.ops import StochasticDepth
 from collections import namedtuple
 from datasets import Dataset
+from sklearn.metrics import accuracy_score, f1_score, matthews_corrcoef, precision_score, recall_score
 
 """# HyenaDNA
 
@@ -1279,9 +1280,6 @@ from random import random
 import numpy as np
 from pathlib import Path
 from torch.utils.data import DataLoader
-
-from genomic_benchmarks.loc2seq import download_dataset
-from genomic_benchmarks.data_check import is_downloaded
 
 
 # helper functions

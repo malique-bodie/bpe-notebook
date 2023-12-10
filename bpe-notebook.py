@@ -1661,6 +1661,7 @@ def run_train():
     ds_test = Dataset.from_dict({"input_ids": test_tokenized, "labels": test_labels})
     ds_train.set_format("pt")
     ds_test.set_format("pt")
+    print(ds_test)
 
 
     # ds_train = GenomicBenchmarkDataset(
@@ -1683,7 +1684,7 @@ def run_train():
     #     add_eos=add_eos,
     # )
 
-    train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True,)
     test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
 
     print("Data loaded...")

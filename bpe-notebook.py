@@ -1407,7 +1407,6 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, log_interval=1
     """Training loop."""
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        print(data, target)
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -1661,7 +1660,7 @@ def run_train():
     train_sequence = train_sequence.tolist()
     train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
     train_labels = train_df['label']
-    train_labels = train_labels.tolist()
+    train_labels = torch.from_numpy(np.asarray(train_labels.tolist()))
 
     # create datasets
     test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
@@ -1669,7 +1668,8 @@ def run_train():
     test_sequence = test_sequence.tolist()
     test_tokenized = tokenizer(test_sequence)["input_ids"]
     test_labels = test_df['label']
-    test_labels = test_labels.tolist()
+    test_labels = torch.from_numpy(np.asarray(test_labels.tolist()))
+    
 
     ds_train = CustomDataset(train_tokenized,train_labels)
     ds_test = CustomDataset(test_tokenized,test_labels)

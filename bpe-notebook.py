@@ -1642,18 +1642,18 @@ def run_train():
 
     train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
     train_sequence = train_df['sequence']
-    train_sequence = train_sequence.tolist()
+    train_sequence = torch.tensor(train_sequence.tolist())
     train_tokenized = tokenizer(train_sequence, padding=True)["input_ids"]
     train_labels = train_df['label']
-    train_labels = train_labels.tolist()
+    train_labels = torch.tensor(train_labels.tolist())
 
     # create datasets
     test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
     test_sequence = test_df['sequence']
-    test_sequence = test_sequence.tolist()
+    test_sequence = torch.tensor(test_sequence.tolist()) # added torch.tensor to convert from list to tensor for gpu
     test_tokenized = tokenizer(test_sequence)["input_ids"]
     test_labels = test_df['label']
-    test_labels = test_labels.tolist()
+    test_labels = torch.tensor(test_labels.tolist())
 
     # Create a dataset for training
     ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})

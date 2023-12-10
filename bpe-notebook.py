@@ -54,6 +54,7 @@ from functools import partial
 from torch import Tensor
 from torchvision.ops import StochasticDepth
 from collections import namedtuple
+from datasets import Dataset
 
 """# HyenaDNA
 
@@ -946,7 +947,7 @@ import json
 import os
 import subprocess
 import transformers
-from transformers import PreTrainedModel, AutoModelForCausalLM, PretrainedConfig
+from transformers import PreTrainedModel, AutoModelForCausalLM, PretrainedConfig, Trainer, TrainingArguments
 import re
 
 def inject_substring(orig_str):
@@ -1445,6 +1446,19 @@ import subprocess
 import transformers
 from transformers import PreTrainedModel, AutoModelForCausalLM, PretrainedConfig, AddedToken, PreTrainedTokenizerFast
 
+def compute_metrics(eval_pred):
+    """Computes accuracy score for binary classification"""
+    predictions = np.argmax(eval_pred.predictions, axis=-1)
+    references = eval_pred.label_ids
+    r={'accuracy_score': accuracy_score(references, predictions), 
+    'f1_score': f1_score(references, predictions, average="macro", zero_division=0),
+    'matthews_corrcoef': matthews_corrcoef(references, predictions),
+    'precision_score': precision_score(references, predictions, average="macro", zero_division=0),
+    'recall_score': recall_score(references, predictions, average="macro", zero_division=0),
+    }
+    return r
+
+
 def run_train():
 
     '''
@@ -1484,59 +1498,120 @@ def run_train():
 
     # you can override with your own backbone config here if you want,
     # otherwise we'll load the HF one by default
+### Large Model Backbone ###
+#     backbone_cfg ={
+#   "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
+#   "activation_freq": 10,
+#   "architectures": [
+#     "HyenaDNAForCausalLM"
+#   ],
+#   "auto_map": {
+#     "AutoConfig": "configuration_hyena.HyenaConfig",
+#     "AutoModel": "modeling_hyena.HyenaDNAModel",
+#     "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+#     "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+#   },
+#   "d_inner": 1024,
+#   "d_model": 256,
+#   "emb_dim": 5, # was 5
+#   "embed_dropout": 0.1,
+#   "filter_order": 64,
+#   "hyena_dropout": 0.0,
+#   "hyena_filter_dropout": 0.0,
+#   "hyena_order": 2,
+#   "initializer_range": 0.02,
+#   "layer_norm_epsilon": 1e-05,
+#   "max_seq_len": 1026,
+#   "model_type": "hyenadna",
+#   "n_layer": 8,
+#   "num_inner_mlps": 2,
+#   "pad_vocab_size_multiple": 8,
+#   "short_filter_order": 3,
+#   "tie_word_embeddings": False,
+#   "torch_dtype": "float32",
+#   "train_freq": True,
+#   "transformers_version": "4.35.0.dev0",
+#   "use_bias": True,
+#   "vocab_size": 32000,
+#   "layer": {
+#       "_name_": "hyena",
+# "l_max": 1000002,
+# "order": 2,
+# "filter_order": 64,
+# "num_heads": 1,
+# "inner_factor": 1,
+# "num_blocks": 1,
+# "fused_bias_fc": False,
+# "outer_mixing": False,
+# "dropout": 0.0,
+# "filter_dropout": 0.0,
+# "filter_cls": 'hyena-filter',
+# "post_order_ffn": False,
+# "jit_filter": False,
+# "short_filter_order": 3,
+# "activation": "id",
+# "modulate": True,
+# "w": 10,
+# "lr": 6e-4,
+# "wd": 0.0,
+# "lr_pos_emb": 0.0
+#   }
+# }
+
+### Tiny Model Backbone ###
     backbone_cfg ={
-  "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
-  "activation_freq": 10,
-  "architectures": [
-    "HyenaDNAForCausalLM"
-  ],
-  "auto_map": {
-    "AutoConfig": "configuration_hyena.HyenaConfig",
-    "AutoModel": "modeling_hyena.HyenaDNAModel",
-    "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
-    "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
-  },
-  "d_inner": 512,
-  "d_model": 128,
-  "emb_dim": None, # was 5
-  "embed_dropout": 0.1,
-  "filter_order": 64,
-  "hyena_dropout": 0.0,
-  "hyena_filter_dropout": 0.0,
-  "hyena_order": 2,
-  "initializer_range": 0.02,
-  "layer_norm_epsilon": 1e-05,
-  "max_seq_len": 1026,
-  "model_type": "hyenadna",
-  "n_layer": 2,
-  "num_inner_mlps": 2,
-  "pad_vocab_size_multiple": 8,
-  "short_filter_order": 3,
-  "tie_word_embeddings": False,
-  "torch_dtype": "float32",
-  "train_freq": True,
-  "transformers_version": "4.35.0.dev0",
-  "use_bias": True,
-  "vocab_size": 32000,
-  "layer": {
-      "_name_": "hyena",
-"l_max": 1024,
-"order": 2,
-"filter_order": 64,
-"num_heads": 1,
-"inner_factor": 1,
-"num_blocks": 1,
-"fused_bias_fc": False,
-"outer_mixing": False,
-"dropout": 0.0,
-"filter_dropout": 0.0,
-"filter_cls": 'hyena-filter',
-"post_order_ffn": False,
-"jit_filter": False,
-"short_filter_order": 3,
-"activation": "id"
-  }
-}
+    "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
+    "activation_freq": 10,
+    "architectures": [
+        "HyenaDNAForCausalLM"
+    ],
+    "auto_map": {
+        "AutoConfig": "configuration_hyena.HyenaConfig",
+        "AutoModel": "modeling_hyena.HyenaDNAModel",
+        "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+        "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+    },
+    "d_inner": 512,
+    "d_model": 128,
+    "emb_dim": None, # was 5
+    "embed_dropout": 0.1,
+    "filter_order": 64,
+    "hyena_dropout": 0.0,
+    "hyena_filter_dropout": 0.0,
+    "hyena_order": 2,
+    "initializer_range": 0.02,
+    "layer_norm_epsilon": 1e-05,
+    "max_seq_len": 1026,
+    "model_type": "hyenadna",
+    "n_layer": 2,
+    "num_inner_mlps": 2,
+    "pad_vocab_size_multiple": 8,
+    "short_filter_order": 3,
+    "tie_word_embeddings": False,
+    "torch_dtype": "float32",
+    "train_freq": True,
+    "transformers_version": "4.35.0.dev0",
+    "use_bias": True,
+    "vocab_size": 32000,
+    "layer": {
+            "_name_": "hyena",
+            "l_max": 1024,
+            "order": 2,
+            "filter_order": 64,
+            "num_heads": 1,
+            "inner_factor": 1,
+            "num_blocks": 1,
+            "fused_bias_fc": False,
+            "outer_mixing": False,
+            "dropout": 0.0,
+            "filter_dropout": 0.0,
+            "filter_cls": 'hyena-filter',
+            "post_order_ffn": False,
+            "jit_filter": False,
+            "short_filter_order": 3,
+            "activation": "id"
+            }
+    }
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu' 
     print("Using device:", device)
@@ -1567,29 +1642,50 @@ def run_train():
     #     padding_side='left', # since HyenaDNA is causal, we pad on the left
     # )
 
+    train_df = pd.read_csv("GUE/tf/0/train.csv", header=0)
+    train_sequence = train_df['sequence']
+    train_sequence = train_sequence.tolist()
+    train_tokenized = tokenizer(train_sequence)["input_ids"]
+    train_labels = train_df['label']
+    train_labels = train_labels.tolist()
+
     # create datasets
-    ds_train = GenomicBenchmarkDataset(
-        max_length = max_length,
-        use_padding = use_padding,
-        split = 'train',
-        tokenizer=tokenizer,
-        dataset_name=dataset_name,
-        rc_aug=rc_aug,
-        add_eos=add_eos,
-    )
+    test_df = pd.read_csv("GUE/tf/0/test.csv", header=0)
+    test_sequence = test_df['sequence']
+    test_sequence = test_sequence.tolist()
+    test_tokenized = tokenizer(test_sequence)["input_ids"]
+    test_labels = test_df['label']
+    test_labels = test_labels.tolist()
 
-    ds_test = GenomicBenchmarkDataset(
-        max_length = max_length,
-        use_padding = use_padding,
-        split = 'test',
-        tokenizer=tokenizer,
-        dataset_name=dataset_name,
-        rc_aug=rc_aug,
-        add_eos=add_eos,
-    )
+    # Create a dataset for training
+    ds_train = Dataset.from_dict({"input_ids": train_tokenized, "labels": train_labels})
+    ds_test = Dataset.from_dict({"input_ids": test_tokenized, "labels": test_labels})
+    ds_train.set_format("pt")
+    ds_test.set_format("pt")
 
-    train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
+
+    # ds_train = GenomicBenchmarkDataset(
+    #     max_length = max_length,
+    #     use_padding = use_padding,
+    #     split = 'train',
+    #     tokenizer=tokenizer,
+    #     dataset_name=dataset_name,
+    #     rc_aug=rc_aug,
+    #     add_eos=add_eos,
+    # )
+
+    # ds_test = GenomicBenchmarkDataset(
+    #     max_length = max_length,
+    #     use_padding = use_padding,
+    #     split = 'test',
+    #     tokenizer=tokenizer,
+    #     dataset_name=dataset_name,
+    #     rc_aug=rc_aug,
+    #     add_eos=add_eos,
+    # )
+
+    # train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True)
+    # test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
 
     print("Data loaded...")
 
@@ -1601,10 +1697,30 @@ def run_train():
 
     model.to(device)
 
-    for epoch in range(num_epochs):
-        train(model, device, train_loader, optimizer, epoch, loss_fn)
-        test(model, device, test_loader, loss_fn)
-        optimizer.step()
+    args = {
+    "output_dir": "tmp",
+    "evaluation_strategy": "epoch",
+    "save_strategy": "no",
+    "num_train_epochs": 100,
+    "per_device_train_batch_size": 256,
+    "learning_rate": 2e-5,
+    "per_device_eval_batch_size": 1,
+    }
+    training_args = TrainingArguments(**args)
+
+    # for epoch in range(num_epochs):
+
+    #     train(model, device, train_loader, optimizer, epoch, loss_fn)
+    #     test(model, device, test_loader, loss_fn)
+    #     optimizer.step()
+    trainer = Trainer(model=model,
+                args=training_args,
+                train_dataset=ds_train,
+                eval_dataset=ds_test,
+                compute_metrics=compute_metrics,)
+    
+    result = trainer.train()
+    print(result)
 
 # launch it!
 run_train()  # uncomment to run

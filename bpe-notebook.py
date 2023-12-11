@@ -42,6 +42,7 @@ Credit: much of the code is forked and extended from [S4](https://github.com/Haz
 
 #@title Imports
 # for HyenaDNA specifically
+import csv
 import torch
 import math
 import torch
@@ -1387,6 +1388,50 @@ class GenomicBenchmarkDataset(torch.utils.data.Dataset):
 
         return seq, target
 
+class SupervisedDataset(Dataset):
+    """Dataset for supervised fine-tuning."""
+
+    def __init__(self, 
+                 data_path: str, 
+                 tokenizer: transformers.PreTrainedTokenizer):
+
+        super(SupervisedDataset, self).__init__()
+
+        # load data from the disk
+        with open(data_path, "r") as f:
+            data = list(csv.reader(f))[1:]
+        if len(data[0]) == 2:
+            # data is in the format of [text, label]
+            texts = [d[0] for d in data]
+            labels = [int(d[1]) for d in data]
+        elif len(data[0]) == 3:
+            # data is in the format of [text1, text2, label]
+            texts = [[d[0], d[1]] for d in data]
+            labels = [int(d[2]) for d in data]
+        else:
+            raise ValueError("Data format not supported.")
+        
+        output = tokenizer(
+            texts,
+            return_tensors="pt",
+            padding="longest",
+            max_length=tokenizer.model_max_length,
+            truncation=True,
+        )
+
+        self.input_ids = output["input_ids"]
+        self.attention_mask = output["attention_mask"]
+        self.labels = labels
+        self.num_labels = len(set(labels))
+
+    def __len__(self):
+        return len(self.input_ids)
+
+    def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+        target = torch.LongTensor([self.labels[i]])
+        data = self.input_ids[i]
+        return data, target
+
 """# Training! (and fine-tuning)"""
 
 import torch.optim as optim
@@ -1671,24 +1716,13 @@ def run_train():
     # # print(ds_test)
 
 
-    ds_train = GenomicBenchmarkDataset(
-        max_length = max_length,
-        use_padding = use_padding,
-        split = 'train',
-        tokenizer=tokenizer,
-        dataset_name=dataset_name,
-        rc_aug=rc_aug,
-        add_eos=add_eos,
+    ds_train = SupervisedDataset(
+        data_path="GUE/tf/0/test.csv",
+        tokenizer=tokenizer
     )
-
-    ds_test = GenomicBenchmarkDataset(
-        max_length = max_length,
-        use_padding = use_padding,
-        split = 'test',
-        tokenizer=tokenizer,
-        dataset_name=dataset_name,
-        rc_aug=rc_aug,
-        add_eos=add_eos,
+    ds_test = SupervisedDataset(
+        data_path="GUE/tf/0/test.csv",
+        tokenizer=tokenizer
     )
 
     train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True,)

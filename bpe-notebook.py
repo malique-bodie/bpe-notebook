@@ -1393,7 +1393,8 @@ class SupervisedDataset(Dataset):
 
     def __init__(self, 
                  data_path: str, 
-                 tokenizer: transformers.PreTrainedTokenizer):
+                 tokenizer: transformers.PreTrainedTokenizer,
+                 max_length):
 
         super(SupervisedDataset, self).__init__()
 
@@ -1411,26 +1412,36 @@ class SupervisedDataset(Dataset):
         else:
             raise ValueError("Data format not supported.")
         
-        output = tokenizer(
-            texts,
-            return_tensors="pt",
-            padding="longest",
-            max_length=tokenizer.model_max_length,
-            truncation=True,
-        )
+        self.texts = texts
+        # output = tokenizer(
+        #     texts,
+        #     return_tensors="pt",
+        #     padding="longest",
+        #     max_length=tokenizer.model_max_length,
+        #     truncation=True,
+        # )
 
-        self.input_ids = output["input_ids"]
-        self.attention_mask = output["attention_mask"]
-        self.labels = labels
+        # self.input_ids = output["input_ids"]
+        # self.attention_mask = output["attention_mask"]
+        # self.labels = labels
         self.num_labels = len(set(labels))
+        self.max_length = max_length
 
     def __len__(self):
         return len(self.input_ids)
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
         target = torch.LongTensor([self.labels[i]])
-        data = self.input_ids[i]
-        return data, target
+        seq = self.tokenizer(self.texts[i],
+            add_special_tokens=False,
+            padding="max_length",
+            max_length=self.max_length,
+            truncation=True,
+        )  # add cls and eos token (+2)
+        seq = seq["input_ids"]  # get input_ids
+        # convert to tensor
+        seq = torch.LongTensor(seq)
+        return seq, target
 
 """# Training! (and fine-tuning)"""
 
@@ -1718,11 +1729,13 @@ def run_train():
 
     ds_train = SupervisedDataset(
         data_path="GUE/tf/0/test.csv",
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        max_length=max_length
     )
     ds_test = SupervisedDataset(
         data_path="GUE/tf/0/test.csv",
-        tokenizer=tokenizer
+        tokenizer=tokenizer,
+        max_length=max_length
     )
 
     train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True,)

@@ -1457,8 +1457,6 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, log_interval=1
     """Training loop."""
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-        print(f"Target is: {target}")
-        print(f"Data is: {data} ")
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)

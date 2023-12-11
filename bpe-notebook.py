@@ -1423,7 +1423,7 @@ class SupervisedDataset(Dataset):
 
         # self.input_ids = output["input_ids"]
         # self.attention_mask = output["attention_mask"]
-        # self.labels = labels
+        self.labels = labels
         self.num_labels = len(set(labels))
         self.max_length = max_length
 

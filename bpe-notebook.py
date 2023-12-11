@@ -1306,7 +1306,7 @@ def train(model, device, train_loader, optimizer, epoch, loss_fn, log_interval=1
         if batch_idx % log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+                100. * batch_idx / len(train_loader), loss.item()), flush=True)
 
 def test(model, device, test_loader, loss_fn):
     """Test loop."""
@@ -1325,7 +1325,7 @@ def test(model, device, test_loader, loss_fn):
 
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+        100. * correct / len(test_loader.dataset)), flush=True)
 
 import json
 import os
@@ -1505,7 +1505,7 @@ def run_train():
     train_loader = DataLoader(ds_train, batch_size=batch_size, shuffle=True,)
     test_loader = DataLoader(ds_test, batch_size=batch_size, shuffle=False)
 
-    print("Data loaded...")
+    print("Data loaded...", flush=True)
 
     #loss function
     loss_fn = nn.CrossEntropyLoss()

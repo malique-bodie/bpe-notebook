@@ -1413,6 +1413,7 @@ class SupervisedDataset(Dataset):
             raise ValueError("Data format not supported.")
         
         self.texts = texts
+        self.tokenizer = tokenizer
         # output = tokenizer(
         #     texts,
         #     return_tensors="pt",

@@ -15,7 +15,6 @@ HyenaDNA training (BPE)
 import csv
 import torch
 import math
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from functools import partial

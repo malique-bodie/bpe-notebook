@@ -1729,7 +1729,7 @@ def run_train():
 
 
     ds_train = SupervisedDataset(
-        data_path="GUE/tf/0/test.csv",
+        data_path="GUE/tf/0/train.csv",
         tokenizer=tokenizer,
         max_length=max_length
     )

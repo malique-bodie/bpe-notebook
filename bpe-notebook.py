@@ -1428,7 +1428,7 @@ class SupervisedDataset(Dataset):
         self.max_length = max_length
 
     def __len__(self):
-        return len(self.input_ids)
+        return len(self.texts)
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
         target = torch.LongTensor([self.labels[i]])

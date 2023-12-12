@@ -1354,9 +1354,9 @@ def run_train():
 
     '''
     # experiment settings:
-    num_epochs = 100  # ~100 seems fine
+    num_epochs = 10  # ~100 seems fine CHANGE BACK TO 100 AFTER
     max_length = 500  # max len of sequence of dataset (of what you want)
-    batch_size = 256
+    batch_size = 512 # CHANGE TO 256 AFTER
     learning_rate = 6e-4  # good default for Hyena
     rc_aug = True  # reverse complement augmentation
     add_eos = False  # add end of sentence token
@@ -1368,119 +1368,119 @@ def run_train():
 
 
 ### Large Model Backbone ###
-    backbone_cfg ={
-  "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
-  "activation_freq": 10,
-  "architectures": [
-    "HyenaDNAForCausalLM"
-  ],
-  "auto_map": {
-    "AutoConfig": "configuration_hyena.HyenaConfig",
-    "AutoModel": "modeling_hyena.HyenaDNAModel",
-    "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
-    "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
-  },
-  "d_inner": 1024,
-  "d_model": 256,
-  "emb_dim": 5, # was 5
-  "embed_dropout": 0.1,
-  "filter_order": 64,
-  "hyena_dropout": 0.0,
-  "hyena_filter_dropout": 0.0,
-  "hyena_order": 2,
-  "initializer_range": 0.02,
-  "layer_norm_epsilon": 1e-05,
-  "max_seq_len": 1026,
-  "model_type": "hyenadna",
-  "n_layer": 8,
-  "num_inner_mlps": 2,
-  "pad_vocab_size_multiple": 8,
-  "short_filter_order": 3,
-  "tie_word_embeddings": False,
-  "torch_dtype": "float32",
-  "train_freq": True,
-  "transformers_version": "4.35.0.dev0",
-  "use_bias": True,
-  "vocab_size": 32000,
-  "layer": {
-      "_name_": "hyena",
-"l_max": 1000002,
-"order": 2,
-"filter_order": 64,
-"num_heads": 1,
-"inner_factor": 1,
-"num_blocks": 1,
-"fused_bias_fc": False,
-"outer_mixing": False,
-"dropout": 0.0,
-"filter_dropout": 0.0,
-"filter_cls": 'hyena-filter',
-"post_order_ffn": False,
-"jit_filter": False,
-"short_filter_order": 3,
-"activation": "id",
-"modulate": True,
-"w": 10,
-"lr": 6e-4,
-"wd": 0.0,
-"lr_pos_emb": 0.0
-  }
-}
+#     backbone_cfg ={
+#   "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
+#   "activation_freq": 10,
+#   "architectures": [
+#     "HyenaDNAForCausalLM"
+#   ],
+#   "auto_map": {
+#     "AutoConfig": "configuration_hyena.HyenaConfig",
+#     "AutoModel": "modeling_hyena.HyenaDNAModel",
+#     "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+#     "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+#   },
+#   "d_inner": 1024,
+#   "d_model": 256,
+#   "emb_dim": 5, # was 5
+#   "embed_dropout": 0.1,
+#   "filter_order": 64,
+#   "hyena_dropout": 0.0,
+#   "hyena_filter_dropout": 0.0,
+#   "hyena_order": 2,
+#   "initializer_range": 0.02,
+#   "layer_norm_epsilon": 1e-05,
+#   "max_seq_len": 1026,
+#   "model_type": "hyenadna",
+#   "n_layer": 8,
+#   "num_inner_mlps": 2,
+#   "pad_vocab_size_multiple": 8,
+#   "short_filter_order": 3,
+#   "tie_word_embeddings": False,
+#   "torch_dtype": "float32",
+#   "train_freq": True,
+#   "transformers_version": "4.35.0.dev0",
+#   "use_bias": True,
+#   "vocab_size": 32000,
+#   "layer": {
+#       "_name_": "hyena",
+# "l_max": 1000002,
+# "order": 2,
+# "filter_order": 64,
+# "num_heads": 1,
+# "inner_factor": 1,
+# "num_blocks": 1,
+# "fused_bias_fc": False,
+# "outer_mixing": False,
+# "dropout": 0.0,
+# "filter_dropout": 0.0,
+# "filter_cls": 'hyena-filter',
+# "post_order_ffn": False,
+# "jit_filter": False,
+# "short_filter_order": 3,
+# "activation": "id",
+# "modulate": True,
+# "w": 10,
+# "lr": 6e-4,
+# "wd": 0.0,
+# "lr_pos_emb": 0.0
+#   }
+# }
 
-### Tiny Model Backbone ###
-    # backbone_cfg ={
-    # "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
-    # "activation_freq": 10,
-    # "architectures": [
-    #     "HyenaDNAForCausalLM"
-    # ],
-    # "auto_map": {
-    #     "AutoConfig": "configuration_hyena.HyenaConfig",
-    #     "AutoModel": "modeling_hyena.HyenaDNAModel",
-    #     "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
-    #     "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
-    # },
-    # "d_inner": 512,
-    # "d_model": 128,
-    # "emb_dim": None, # was 5
-    # "embed_dropout": 0.1,
-    # "filter_order": 64,
-    # "hyena_dropout": 0.0,
-    # "hyena_filter_dropout": 0.0,
-    # "hyena_order": 2,
-    # "initializer_range": 0.02,
-    # "layer_norm_epsilon": 1e-05,
-    # "max_seq_len": 1026,
-    # "model_type": "hyenadna",
-    # "n_layer": 2,
-    # "num_inner_mlps": 2,
-    # "pad_vocab_size_multiple": 8,
-    # "short_filter_order": 3,
-    # "tie_word_embeddings": False,
-    # "torch_dtype": "float32",
-    # "train_freq": True,
-    # "transformers_version": "4.35.0.dev0",
-    # "use_bias": True,
-    # "vocab_size": 32000,
-    # "layer": {
-    #         "_name_": "hyena",
-    #         "l_max": 1024,
-    #         "order": 2,
-    #         "filter_order": 64,
-    #         "num_heads": 1,
-    #         "inner_factor": 1,
-    #         "num_blocks": 1,
-    #         "fused_bias_fc": False,
-    #         "outer_mixing": False,
-    #         "dropout": 0.0,
-    #         "filter_dropout": 0.0,
-    #         "filter_cls": 'hyena-filter',
-    #         "post_order_ffn": False,
-    #         "jit_filter": False,
-    #         "short_filter_order": 3,
-    #         "activation": "id"
-    #         }
-    # }
+### Tiny Model Backbone ####
+    backbone_cfg ={
+    "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
+    "activation_freq": 10,
+    "architectures": [
+        "HyenaDNAForCausalLM"
+    ],
+    "auto_map": {
+        "AutoConfig": "configuration_hyena.HyenaConfig",
+        "AutoModel": "modeling_hyena.HyenaDNAModel",
+        "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+        "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+    },
+    "d_inner": 512,
+    "d_model": 128,
+    "emb_dim": None, # was 5
+    "embed_dropout": 0.1,
+    "filter_order": 64,
+    "hyena_dropout": 0.0,
+    "hyena_filter_dropout": 0.0,
+    "hyena_order": 2,
+    "initializer_range": 0.02,
+    "layer_norm_epsilon": 1e-05,
+    "max_seq_len": 1026,
+    "model_type": "hyenadna",
+    "n_layer": 2,
+    "num_inner_mlps": 2,
+    "pad_vocab_size_multiple": 8,
+    "short_filter_order": 3,
+    "tie_word_embeddings": False,
+    "torch_dtype": "float32",
+    "train_freq": True,
+    "transformers_version": "4.35.0.dev0",
+    "use_bias": True,
+    "vocab_size": 32000,
+    "layer": {
+            "_name_": "hyena",
+            "l_max": 1024,
+            "order": 2,
+            "filter_order": 64,
+            "num_heads": 1,
+            "inner_factor": 1,
+            "num_blocks": 1,
+            "fused_bias_fc": False,
+            "outer_mixing": False,
+            "dropout": 0.0,
+            "filter_dropout": 0.0,
+            "filter_cls": 'hyena-filter',
+            "post_order_ffn": False,
+            "jit_filter": False,
+            "short_filter_order": 3,
+            "activation": "id"
+            }
+    }
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu' 
     print("Using device:", device)

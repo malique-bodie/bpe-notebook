@@ -1500,12 +1500,12 @@ def run_train():
     )
 
     ds_train = SupervisedDataset(
-        data_path="GUE/tf/1/train.csv",
+        data_path="GUE/tf/2/train.csv",
         tokenizer=tokenizer,
         max_length=max_length
     )
     ds_test = SupervisedDataset(
-        data_path="GUE/tf/1/test.csv",
+        data_path="GUE/tf/2/test.csv",
         tokenizer=tokenizer,
         max_length=max_length
     )

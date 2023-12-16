@@ -1461,7 +1461,7 @@ def run_train():
     "train_freq": True,
     "transformers_version": "4.35.0.dev0",
     "use_bias": True,
-    "vocab_size": 32000,
+    "vocab_size": 12, #32000,
     "layer": {
             "_name_": "hyena",
             "l_max": 1024,
@@ -1489,7 +1489,15 @@ def run_train():
     model = HyenaDNAModel(**backbone_cfg, use_head=use_head, n_classes=n_classes)
 
     # create tokenizer
-    tokenizer = PreTrainedTokenizerFast(pad_token=AddedToken("[PAD]", lstrip=False, rstrip=False), tokenizer_file="bpe_output.json")
+    #tokenizer = PreTrainedTokenizerFast(pad_token=AddedToken("[PAD]", lstrip=False, rstrip=False), tokenizer_file="bpe_output.json")
+
+    # create tokenizer
+    tokenizer = CharacterTokenizer(
+        characters=['A', 'C', 'G', 'T', 'N'],  # add DNA characters, N is uncertain
+        model_max_length=max_length + 2,  # to account for special tokens, like EOS
+        add_special_tokens=False,  # we handle special tokens elsewhere
+        padding_side='left', # since HyenaDNA is causal, we pad on the left
+    )
 
     ds_train = SupervisedDataset(
         data_path="GUE/tf/0/train.csv",

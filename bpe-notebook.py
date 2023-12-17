@@ -1194,7 +1194,6 @@ from tokenizers.trainers import BpeTrainer
 import pandas as pd
 
 
-"""""
 # logic for training a BPE tokenizer on the human genome
 unk_token = "[UNK]"  # token for unknown words
 spl_tokens = ["[CLS]", "[SEP]", "[BOS]", "[MASK]", "[PAD]", "[RESERVED]", "[UNK]"]  # special tokens
@@ -1213,7 +1212,7 @@ vocab_str_to_int = {
 vocab_int_to_str = {v: k for k, v in vocab_str_to_int.items()}
 
 tokenizer = Tokenizer(BPE(unk_token=unk_token))
-trainer = BpeTrainer(vocab_size=32000, special_tokens=spl_tokens)
+trainer = BpeTrainer(vocab_size=1000, special_tokens=spl_tokens) #1k experiments
 
 def read_sequences(file_path):
     df = pd.read_csv(file_path)
@@ -1232,7 +1231,6 @@ tokenizer.save(f"./bpe_output.json")
 
 print("BPE saved")
 
-"""""
 
 import numpy as np
 from pathlib import Path
@@ -1346,7 +1344,7 @@ def compute_metrics(eval_pred):
     return r
 
 
-def run_train():
+def run_train(train_path, test_path):
 
     '''
     Main entry point for training.  Select the dataset name and metadata, as
@@ -1368,118 +1366,117 @@ def run_train():
 
 
 ### Large Model Backbone ###
-    backbone_cfg ={
-  "activation_freq": 10,
-  "architectures": [
-    "HyenaDNAForCausalLM"
-  ],
-  "auto_map": {
-    "AutoConfig": "configuration_hyena.HyenaConfig",
-    "AutoModel": "modeling_hyena.HyenaDNAModel",
-    "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
-    "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
-  },
-  "d_inner": 1024,
-  "d_model": 256,
-  "emb_dim": 5, # was 5
-  "embed_dropout": 0.1,
-  "filter_order": 64,
-  "hyena_dropout": 0.0,
-  "hyena_filter_dropout": 0.0,
-  "hyena_order": 2,
-  "initializer_range": 0.02,
-  "layer_norm_epsilon": 1e-05,
-  "max_seq_len": 1026,
-  "model_type": "hyenadna",
-  "n_layer": 8,
-  "num_inner_mlps": 2,
-  "pad_vocab_size_multiple": 8,
-  "short_filter_order": 3,
-  "tie_word_embeddings": False,
-  "torch_dtype": "float32",
-  "train_freq": True,
-  "transformers_version": "4.35.0.dev0",
-  "use_bias": True,
-  "vocab_size": 12, #32000,
-  "layer": {
-      "_name_": "hyena",
-"l_max": 1000002,
-"order": 2,
-"filter_order": 64,
-"num_heads": 1,
-"inner_factor": 1,
-"num_blocks": 1,
-"fused_bias_fc": False,
-"outer_mixing": False,
-"dropout": 0.0,
-"filter_dropout": 0.0,
-"filter_cls": 'hyena-filter',
-"post_order_ffn": False,
-"jit_filter": False,
-"short_filter_order": 3,
-"activation": "id",
-"modulate": True,
-"w": 10,
-"lr": 6e-4,
-"wd": 0.0,
-"lr_pos_emb": 0.0
-  }
-}
+#     backbone_cfg ={
+#   "activation_freq": 10,
+#   "architectures": [
+#     "HyenaDNAForCausalLM"
+#   ],
+#   "auto_map": {
+#     "AutoConfig": "configuration_hyena.HyenaConfig",
+#     "AutoModel": "modeling_hyena.HyenaDNAModel",
+#     "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+#     "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+#   },
+#   "d_inner": 1024,
+#   "d_model": 256,
+#   "emb_dim": 5, # was 5
+#   "embed_dropout": 0.1,
+#   "filter_order": 64,
+#   "hyena_dropout": 0.0,
+#   "hyena_filter_dropout": 0.0,
+#   "hyena_order": 2,
+#   "initializer_range": 0.02,
+#   "layer_norm_epsilon": 1e-05,
+#   "max_seq_len": 1026,
+#   "model_type": "hyenadna",
+#   "n_layer": 8,
+#   "num_inner_mlps": 2,
+#   "pad_vocab_size_multiple": 8,
+#   "short_filter_order": 3,
+#   "tie_word_embeddings": False,
+#   "torch_dtype": "float32",
+#   "train_freq": True,
+#   "transformers_version": "4.35.0.dev0",
+#   "use_bias": True,
+#   "vocab_size": 12, #32000,
+#   "layer": {
+#       "_name_": "hyena",
+# "l_max": 1000002,
+# "order": 2,
+# "filter_order": 64,
+# "num_heads": 1,
+# "inner_factor": 1,
+# "num_blocks": 1,
+# "fused_bias_fc": False,
+# "outer_mixing": False,
+# "dropout": 0.0,
+# "filter_dropout": 0.0,
+# "filter_cls": 'hyena-filter',
+# "post_order_ffn": False,
+# "jit_filter": False,
+# "short_filter_order": 3,
+# "activation": "id",
+# "modulate": True,
+# "w": 10,
+# "lr": 6e-4,
+# "wd": 0.0,
+# "lr_pos_emb": 0.0
+#   }
+# }
 
 ### Tiny Model Backbone ####
-    # backbone_cfg ={
-    # "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
-    # "activation_freq": 10,
-    # "architectures": [
-    #     "HyenaDNAForCausalLM"
-    # ],
-    # "auto_map": {
-    #     "AutoConfig": "configuration_hyena.HyenaConfig",
-    #     "AutoModel": "modeling_hyena.HyenaDNAModel",
-    #     "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
-    #     "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
-    # },
-    # "d_inner": 512,
-    # "d_model": 128,
-    # "emb_dim": None, # was 5
-    # "embed_dropout": 0.1,
-    # "filter_order": 64,
-    # "hyena_dropout": 0.0,
-    # "hyena_filter_dropout": 0.0,
-    # "hyena_order": 2,
-    # "initializer_range": 0.02,
-    # "layer_norm_epsilon": 1e-05,
-    # "max_seq_len": 1026,
-    # "model_type": "hyenadna",
-    # "n_layer": 2,
-    # "num_inner_mlps": 2,
-    # "pad_vocab_size_multiple": 8,
-    # "short_filter_order": 3,
-    # "tie_word_embeddings": False,
-    # "torch_dtype": "float32",
-    # "train_freq": True,
-    # "transformers_version": "4.35.0.dev0",
-    # "use_bias": True,
-    # "vocab_size": 12, #32000,
-    # "layer": {
-    #         "_name_": "hyena",
-    #         "l_max": 1024,
-    #         "order": 2,
-    #         "filter_order": 64,
-    #         "num_heads": 1,
-    #         "inner_factor": 1,
-    #         "num_blocks": 1,
-    #         "fused_bias_fc": False,
-    #         "outer_mixing": False,
-    #         "dropout": 0.0,
-    #         "filter_dropout": 0.0,
-    #         "filter_cls": 'hyena-filter',
-    #         "post_order_ffn": False,
-    #         "jit_filter": False,
-    #         "short_filter_order": 3,
-    #         "activation": "id"
-    #         }
-    # }
+    backbone_cfg ={
+    "activation_freq": 10,
+    "architectures": [
+        "HyenaDNAForCausalLM"
+    ],
+    "auto_map": {
+        "AutoConfig": "configuration_hyena.HyenaConfig",
+        "AutoModel": "modeling_hyena.HyenaDNAModel",
+        "AutoModelForCausalLM": "modeling_hyena.HyenaDNAForCausalLM",
+        "AutoModelForSequenceClassification": "modeling_hyena.HyenaDNAForSequenceClassification"
+    },
+    "d_inner": 512,
+    "d_model": 128,
+    "emb_dim": 5, # was 5
+    "embed_dropout": 0.1,
+    "filter_order": 64,
+    "hyena_dropout": 0.0,
+    "hyena_filter_dropout": 0.0,
+    "hyena_order": 2,
+    "initializer_range": 0.02,
+    "layer_norm_epsilon": 1e-05,
+    "max_seq_len": 1026,
+    "model_type": "hyenadna",
+    "n_layer": 2,
+    "num_inner_mlps": 2,
+    "pad_vocab_size_multiple": 8,
+    "short_filter_order": 3,
+    "tie_word_embeddings": False,
+    "torch_dtype": "float32",
+    "train_freq": True,
+    "transformers_version": "4.35.0.dev0",
+    "use_bias": True,
+    "vocab_size": 1000, #32000,
+    "layer": {
+            "_name_": "hyena",
+            "l_max": 1024,
+            "order": 2,
+            "filter_order": 64,
+            "num_heads": 1,
+            "inner_factor": 1,
+            "num_blocks": 1,
+            "fused_bias_fc": False,
+            "outer_mixing": False,
+            "dropout": 0.0,
+            "filter_dropout": 0.0,
+            "filter_cls": 'hyena-filter',
+            "post_order_ffn": False,
+            "jit_filter": False,
+            "short_filter_order": 3,
+            "activation": "id"
+            }
+    }
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu' 
     print("Using device:", device)
@@ -1488,23 +1485,23 @@ def run_train():
     model = HyenaDNAModel(**backbone_cfg, use_head=use_head, n_classes=n_classes)
 
     # create tokenizer
-    #tokenizer = PreTrainedTokenizerFast(pad_token=AddedToken("[PAD]", lstrip=False, rstrip=False), tokenizer_file="bpe_output.json")
+    tokenizer = PreTrainedTokenizerFast(pad_token=AddedToken("[PAD]", lstrip=False, rstrip=False), tokenizer_file="bpe_output.json")
 
     # create tokenizer
-    tokenizer = CharacterTokenizer(
-        characters=['A', 'C', 'G', 'T', 'N'],  # add DNA characters, N is uncertain
-        model_max_length=max_length + 2,  # to account for special tokens, like EOS
-        add_special_tokens=False,  # we handle special tokens elsewhere
-        padding_side='left', # since HyenaDNA is causal, we pad on the left
-    )
+    # tokenizer = CharacterTokenizer(
+    #     characters=['A', 'C', 'G', 'T', 'N'],  # add DNA characters, N is uncertain
+    #     model_max_length=max_length + 2,  # to account for special tokens, like EOS
+    #     add_special_tokens=False,  # we handle special tokens elsewhere
+    #     padding_side='left', # since HyenaDNA is causal, we pad on the left
+    # )
 
     ds_train = SupervisedDataset(
-        data_path="GUE/tf/0/train.csv",
+        data_path=train_path,
         tokenizer=tokenizer,
         max_length=max_length
     )
     ds_test = SupervisedDataset(
-        data_path="GUE/tf/0/test.csv",
+        data_path=test_path,
         tokenizer=tokenizer,
         max_length=max_length
     )
@@ -1529,4 +1526,8 @@ def run_train():
         optimizer.step()
 
 # launch it!
-run_train()
+for i in range(5):
+    print(f"######## TRAINING ON TF {i} ########")
+    train_path = f"GUE/tf/{i}/train.csv"
+    test_path = f"GUE/tf/{i}/test.csv"
+    run_train(train_path, test_path)

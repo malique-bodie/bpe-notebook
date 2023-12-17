@@ -1212,7 +1212,7 @@ vocab_str_to_int = {
 vocab_int_to_str = {v: k for k, v in vocab_str_to_int.items()}
 
 tokenizer = Tokenizer(BPE(unk_token=unk_token))
-trainer = BpeTrainer(vocab_size=1000, special_tokens=spl_tokens) #1k experiments
+trainer = BpeTrainer(vocab_size=32000, special_tokens=spl_tokens) #1k experiments
 
 def read_sequences(file_path):
     df = pd.read_csv(file_path)
@@ -1458,7 +1458,7 @@ def run_train(train_path, test_path):
     "train_freq": True,
     "transformers_version": "4.35.0.dev0",
     "use_bias": True,
-    "vocab_size": 1000, #32000,
+    "vocab_size": 32000,
     "layer": {
             "_name_": "hyena",
             "l_max": 1024,
@@ -1530,12 +1530,12 @@ def run_train(train_path, test_path):
     print(f"average test accuract is: {sum(average_test_accuracy)/len(average_test_accuracy)}")
 
 # launch it!
-print("######## TRAINING ON PROM 300 NO TATA ########")
-train_path = "GUE/prom/prom-1/train.csv"
-test_path = f"GUE/prom/prom-1/test.csv"
+print("######## TRAINING ON PROM 300 ALL ########")
+train_path = "GUE/prom/prom-0/train.csv"
+test_path = f"GUE/prom/prom-0/test.csv"
 run_train(train_path, test_path)
 
-print("######## TRAINING ON PROM CORE NO TATA ########")
-train_path = "GUE/prom/prom-4/train.csv"
-test_path = f"GUE/prom/prom-4/test.csv"
+print("######## TRAINING ON PROM CORE ALL ########")
+train_path = "GUE/prom/prom-3/train.csv"
+test_path = f"GUE/prom/prom-3/test.csv"
 run_train(train_path, test_path)

@@ -1212,7 +1212,7 @@ vocab_str_to_int = {
 vocab_int_to_str = {v: k for k, v in vocab_str_to_int.items()}
 
 tokenizer = Tokenizer(BPE(unk_token=unk_token))
-trainer = BpeTrainer(vocab_size=8000, special_tokens=spl_tokens) #1k experiments
+trainer = BpeTrainer(vocab_size=1000, special_tokens=spl_tokens) #1k experiments
 
 def read_sequences(file_path):
     df = pd.read_csv(file_path)
@@ -1324,6 +1324,7 @@ def test(model, device, test_loader, loss_fn):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)), flush=True)
+    return 100. * correct / len(test_loader.dataset)
 
 import json
 import os
@@ -1352,7 +1353,7 @@ def run_train(train_path, test_path):
 
     '''
     # experiment settings:
-    num_epochs = 100 
+    num_epochs = 50 
     max_length = 500  # max len of sequence of dataset (of what you want)
     batch_size = 256 
     learning_rate = 6e-4  # good default for Hyena
@@ -1457,7 +1458,7 @@ def run_train(train_path, test_path):
     "train_freq": True,
     "transformers_version": "4.35.0.dev0",
     "use_bias": True,
-    "vocab_size": 8000, #32000,
+    "vocab_size": 1000, #32000,
     "layer": {
             "_name_": "hyena",
             "l_max": 1024,
@@ -1519,15 +1520,22 @@ def run_train(train_path, test_path):
 
     model.to(device)
 
+    average_test_accuracy = []
+
     for epoch in range(num_epochs):
 
         train(model, device, train_loader, optimizer, epoch, loss_fn)
-        test(model, device, test_loader, loss_fn)
+        average_test_accuracy.append(test(model, device, test_loader, loss_fn))
         optimizer.step()
+    print(f"average test accuract is: {sum(average_test_accuracy)/len(average_test_accuracy)}")
 
 # launch it!
-for i in range(6):
-    print(f"######## TRAINING ON PROM{i} ########")
-    train_path = f"GUE/prom/prom-{i}/train.csv"
-    test_path = f"GUE/prom/prom-{i}/test.csv"
-    run_train(train_path, test_path)
+print("######## TRAINING ON PROM 300 ALL ########")
+train_path = "GUE/prom/prom-0/train.csv"
+test_path = f"GUE/prom/prom-0/test.csv"
+run_train(train_path, test_path)
+
+print("######## TRAINING ON PROM CORE ALL ########")
+train_path = "GUE/prom/prom-3/train.csv"
+test_path = f"GUE/prom/prom-3/test.csv"
+run_train(train_path, test_path)

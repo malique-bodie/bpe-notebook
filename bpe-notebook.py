@@ -1369,7 +1369,6 @@ def run_train():
 
 ### Large Model Backbone ###
     backbone_cfg ={
-  "_name_or_path": "hyenadna-tiny-1k-seqlen-hf",
   "activation_freq": 10,
   "architectures": [
     "HyenaDNAForCausalLM"

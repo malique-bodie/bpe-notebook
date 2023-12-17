@@ -1363,7 +1363,7 @@ def run_train(train_path, test_path):
 
     # we need these for the decoder head, if using
     use_head = True
-    n_classes = 2 #CHANGE BACK TO 2
+    n_classes = 3 #CHANGE BACK TO 2
 
 
 ### Large Model Backbone ###
@@ -1530,12 +1530,7 @@ def run_train(train_path, test_path):
     print(f"average test accuract is: {sum(average_test_accuracy)/len(average_test_accuracy)}")
 
 # launch it!
-print("######## TRAINING ON PROM 300 ALL ########")
-train_path = "GUE/prom/prom-0/train.csv"
-test_path = f"GUE/prom/prom-0/test.csv"
-run_train(train_path, test_path)
-
-print("######## TRAINING ON PROM CORE ALL ########")
-train_path = "GUE/prom/prom-3/train.csv"
-test_path = f"GUE/prom/prom-3/test.csv"
+print("######## TRAINING ON SPLICE ########")
+train_path = "GUE/splice/reconstructed/train.csv"
+test_path = f"GUE/splice/reconstructed/test.csv"
 run_train(train_path, test_path)

@@ -1355,7 +1355,7 @@ def run_train(train_path, test_path):
     # experiment settings:
     num_epochs = 50 
     max_length = 500  # max len of sequence of dataset (of what you want)
-    batch_size = 256 
+    batch_size = 128 
     learning_rate = 6e-4  # good default for Hyena
     rc_aug = True  # reverse complement augmentation
     add_eos = False  # add end of sentence token

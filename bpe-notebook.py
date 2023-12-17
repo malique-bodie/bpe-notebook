@@ -1212,7 +1212,7 @@ vocab_str_to_int = {
 vocab_int_to_str = {v: k for k, v in vocab_str_to_int.items()}
 
 tokenizer = Tokenizer(BPE(unk_token=unk_token))
-trainer = BpeTrainer(vocab_size=1000, special_tokens=spl_tokens) #1k experiments
+trainer = BpeTrainer(vocab_size=8000, special_tokens=spl_tokens) #1k experiments
 
 def read_sequences(file_path):
     df = pd.read_csv(file_path)
@@ -1457,7 +1457,7 @@ def run_train(train_path, test_path):
     "train_freq": True,
     "transformers_version": "4.35.0.dev0",
     "use_bias": True,
-    "vocab_size": 1000, #32000,
+    "vocab_size": 8000, #32000,
     "layer": {
             "_name_": "hyena",
             "l_max": 1024,

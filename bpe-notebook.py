@@ -1362,7 +1362,7 @@ def run_train(train_path, test_path):
 
     # we need these for the decoder head, if using
     use_head = True
-    n_classes = 2
+    n_classes = 3 #CHANGE BACK TO 2
 
 
 ### Large Model Backbone ###
@@ -1526,8 +1526,7 @@ def run_train(train_path, test_path):
         optimizer.step()
 
 # launch it!
-for i in range(5):
-    print(f"######## TRAINING ON TF {i} ########")
-    train_path = f"GUE/tf/{i}/train.csv"
-    test_path = f"GUE/tf/{i}/test.csv"
-    run_train(train_path, test_path)
+print("######## TRAINING ON Splice ########")
+train_path = "GUE/splice/reconstructed/train.csv"
+test_path = "GUE/splice/reconstructed/test.csv"
+run_train(train_path, test_path)

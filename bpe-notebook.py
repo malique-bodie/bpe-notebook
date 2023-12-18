@@ -1529,12 +1529,12 @@ def run_train(train_path, test_path):
     print(f"average test accuract is: {sum(average_test_accuracy)/len(average_test_accuracy)}")
 
 # launch it!
-print("######## TRAINING ON PROM 300 TATA ########")
-train_path = "GUE/prom/prom-2/train.csv"
-test_path = "GUE/prom/prom-2/test.csv"
+print("######## TRAINING ON PROM 300 NO TATA ########")
+train_path = "GUE/prom/prom-1/train.csv"
+test_path = "GUE/prom/prom-1/test.csv"
 run_train(train_path, test_path)
 
-print("######## TRAINING ON PROM CORE TATA ########")
-train_path = "GUE/prom/prom-5/train.csv"
-test_path = "GUE/prom/prom-5/test.csv"
+print("######## TRAINING ON PROM CORE NO TATA ########")
+train_path = "GUE/prom/prom-4/train.csv"
+test_path = "GUE/prom/prom-4/test.csv"
 run_train(train_path, test_path)
